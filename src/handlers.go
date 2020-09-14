@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,22 +11,19 @@ import (
 func (s *Server) handleexportasset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Handle Export Asset Has Been Called...")
-		// retrieving the ID of the asset that is requested.
-		exportAsset := ExportAsset{}
-		// convert received JSON payload into the declared struct.
-		err := json.NewDecoder(r.Body).Decode(&exportAsset)
-		//check for errors when converting JSON payload into struct.
-		if err != nil {
+		//Get Asset ID from URL
+		assettypeid := r.URL.Query().Get("assettypeid")
+
+		//Check if Asset ID provided is null
+		if assettypeid == "" {
 			w.WriteHeader(500)
-			fmt.Fprintf(w, "Bad JSON provided to export asset")
+			fmt.Fprint(w, "Asset Type ID not properly provided in URL")
+			fmt.Println("Asset Type ID not proplery provided in URL")
 			return
 		}
 
-		//create byte array from JSON payload
-		requestByte, _ := json.Marshal(exportAsset)
-
 		//post to crud service
-		req, respErr := http.Post("http://"+config.CRUDHost+":"+config.CRUDPort+"/assetregister", "application/json", bytes.NewBuffer(requestByte))
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/assetregister?assettypeid=" + assettypeid)
 
 		//check for response error of 500
 		if respErr != nil {
@@ -52,12 +48,6 @@ func (s *Server) handleexportasset() http.HandlerFunc {
 			fmt.Println("Request to DB can't be completed..." + bodyString)
 			return
 		}
-		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprint(w, err.Error())
-			fmt.Println("Exportation is not able to be completed by internal error")
-			return
-		}
 
 		//close the request
 		defer req.Body.Close()
@@ -68,7 +58,7 @@ func (s *Server) handleexportasset() http.HandlerFunc {
 		//decode request into decoder which converts to the struct
 		decoder := json.NewDecoder(req.Body)
 
-		err = decoder.Decode(&assetResponse)
+		err := decoder.Decode(&assetResponse)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprint(w, err.Error())
