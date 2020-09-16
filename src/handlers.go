@@ -12,18 +12,18 @@ func (s *Server) handleexportasset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Handle Export Asset Has Been Called...")
 		//Get Asset ID from URL
-		assettypeid := r.URL.Query().Get("assettypeid")
+		assetid := r.URL.Query().Get("assetid")
 
 		//Check if Asset ID provided is null
-		if assettypeid == "" {
+		if assetid == "" {
 			w.WriteHeader(500)
-			fmt.Fprint(w, "Asset Type ID not properly provided in URL")
-			fmt.Println("Asset Type ID not proplery provided in URL")
+			fmt.Fprint(w, "Asset ID not properly provided in URL")
+			fmt.Println("Asset ID not proplery provided in URL")
 			return
 		}
 
 		//post to crud service
-		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/assetregister?assettypeid=" + assettypeid)
+		req, respErr := http.Get("http://" + config.CRUDHost + ":" + config.CRUDPort + "/assetregister?assetid=" + assetid)
 
 		//check for response error of 500
 		if respErr != nil {
