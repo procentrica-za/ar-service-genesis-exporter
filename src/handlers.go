@@ -73,7 +73,7 @@ func (s *Server) handleexportasset() http.HandlerFunc {
 			return
 		}
 
-		//return back to Front-End user
+		//return back to Front-End user.
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		w.Write(js)
